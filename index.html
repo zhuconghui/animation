@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <title>Babylon.js sample code</title>
+
+    <!-- Babylon.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
+    <script src="https://assets.babylonjs.com/generated/Assets.js"></script>
+    <script src="https://preview.babylonjs.com/ammo.js"></script>
+    <script src="https://preview.babylonjs.com/cannon.js"></script>
+    <script src="https://preview.babylonjs.com/Oimo.js"></script>
+    <script src="https://preview.babylonjs.com/earcut.min.js"></script>
+    <script src="https://preview.babylonjs.com/babylon.js"></script>
+    <script src="https://preview.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+    <script src="https://preview.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
+    <script src="https://preview.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
+    <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+    <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
+    <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
+
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+
+    <script src="babylon.js"></script>
+    <script src="line2D.js"></script>
+    <script src="fct.js"></script>
+    <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
+    <script src="sphere.js"></script>
+
+    <style>
+        html,
+        body {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #renderCanvas {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+        var canvas = document.getElementById("renderCanvas");
+
+        var startRenderLoop = function (engine, canvas) {
+            engine.runRenderLoop(function () {
+                if (sceneToRender && sceneToRender.activeCamera) {
+                    sceneToRender.render();
+                }
+            });
+        }
+
+        var engine = null;
+        var scene = null;
+        var sceneToRender = null;
+        var paquetJSON = {
+            "simulationid": 1,
+            "nb_people": 3,
+            "nb_step": 5,
+            "timeline": {
+                "0": [[0, 0], [1, 1], [2, 2]],
+                "1": [[0, 1], [1, 2], [2, 3]],
+                "2": [[0, 0], [1, 3], [2, 4]],
+                "3": [[2, 0], [1, 4], [2, 5]],
+                "4": [[2, 1], [1, 5], [2, 6]],
+            }
+        };
+        var createDefaultEngine = function () { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true, disableWebGL2Support: false }); };
+
+        var createScene = function () {
+            var scene = new BABYLON.Scene(engine);
+
+            // Camera
+            camera = new BABYLON.ArcRotateCamera("camera1", -Math.PI / 2, Math.PI / 3, 50, new BABYLON.Vector3(0, 0, 0), scene);
+            camera.attachControl(canvas, true);
+
+            var light = new BABYLON.HemisphericLight("hemiLight", new BABYLON.Vector3(5, 10, 5), scene);
+            var positions = [];
+            positions = transformJSON(paquetJSON);
+
+            // BABYLON.SceneLoader.ImportMesh("", "https://www.babylonjs.com/assets/Tree/", "tree.babylon", scene, function (newMeshes) {
+            //     var mesh = newMeshes[0];
+            //     // Make the "root" mesh not visible. The instanced versions of it that we
+            //     // create below will be visible.
+            //     mesh.isVisible = false;
+            //     for (let index = 0; index < 100; index++) {
+            //         var newInstance = mesh.createInstance("i" + index);
+            //         // Here you could change the properties of your individual instance,
+            //         // for example to form a diagonal line of instances:
+            //         //  newInstance.position.x = index;
+            //         //  newInstance.position.z = index;
+            //         // See below for more details on what can be changed.
+            //     }
+            // });
+
+            BABYLON.SceneLoader.ImportMesh("", "https://raw.githubusercontent.com/dlkogan/fileHostTest/master/", "candyBab.babylon", scene, function (newMeshes) {
+                let candy = newMeshes[0];
+                candy.scaling = new BABYLON.Vector3(30, 30, 30);
+                // candy.parent = candyProxy;
+                let candyColor = new BABYLON.StandardMaterial("candyCol", scene);
+                candyColor.diffuseColor = new BABYLON.Color3(0, 1, 0);
+                candy.material = candyColor;
+
+                var t = candy.createInstance("t");
+                t.position = new BABYLON.Vector3(5,5,5);
+                scene.addMesh(t);
+            });
+            // BABYLON.SceneLoader.ImportMesh("test", "Model3D/", "scene.gltf", scene, function (newMeshes) {
+            // //     // Le modèle est chargé et peut être utilisé
+
+            // //     // Récupérer le mesh de l'homme
+            // //     var homme = newMeshes[0];
+
+            // //     // Créer une instance de l'homme
+            // //     var hommeInstance = homme.createInstance("homme-instance");
+
+            // //     // Positionner l'instance de l'homme
+            // //     hommeInstance.position = new BABYLON.Vector3(0, 0, 0);
+
+            // //     // Ajouter l'instance de l'homme à la scène
+            // //     scene.addMesh(hommeInstance);
+            //  });
+
+            var spheres = [];
+            for (let i = 0; i < positions[0].length; i++) {
+                var sphere = new Sphere(positions[0][i], scene);
+                spheres.push(sphere);
+            }
+
+
+            //UI
+            var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+            var panel = new BABYLON.GUI.StackPanel();
+            panel.isVertical = false;
+            panel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+            advancedTexture.addControl(panel);
+
+            var addButton = function (text, callback) {
+                var button = BABYLON.GUI.Button.CreateSimpleButton("button", text);
+                button.width = "140px";
+                button.height = "40px";
+                button.color = "white";
+                button.background = "green";
+                button.paddingLeft = "10px";
+                button.paddingRight = "10px";
+                button.top = "100px";
+                button.onPointerUpObservable.add(function () {
+                    callback();
+                });
+                panel.addControl(button);
+            }
+
+            addButton("Next Moment", function () {
+                for (const sphere of spheres) {
+                    sphere.updatePosition(positions[sphere.timeLineIndex][spheres.indexOf(sphere)]);
+                }
+            });
+
+            var path = [
+                new BABYLON.Vector3(0, 0, 0),
+                new BABYLON.Vector3(10, 0, 0),
+                new BABYLON.Vector3(10, 0, 10),
+                new BABYLON.Vector3(13, 0, 10),
+                new BABYLON.Vector3(13, 0, 13),
+                new BABYLON.Vector3(0, 0, 13)
+            ];
+
+            var line = line2D("line", { path: path, width: 0.5, closed: true }, scene);
+            line.renderingGroupId = 0;
+            // line.material = new BABYLON.StandardMaterial("", scene);
+            // line.material.diffuseTexture = new BABYLON.Texture("https://i.imgur.com/hMnPwJy.png", scene);
+
+            var polygon = BABYLON.MeshBuilder.CreatePolygon("polygon", { shape: path, sideOrientation: BABYLON.Mesh.DOUBLESIDE }, scene);
+
+            polygon.material = new BABYLON.StandardMaterial("cosmos", scene);
+            polygon.material.diffuseTexture = new BABYLON.Texture("https://i.imgur.com/lrznAwV.jpeg", scene);
+
+
+            // const options2={
+            //         shape: [new BABYLON.Vector3(0,0,0), new BABYLON.Vector3(10,0,0),new BABYLON.Vector3(10,0,-10),new BABYLON.Vector3(13,0,-10), 
+            //         new BABYLON.Vector3(13,0,-13),new BABYLON.Vector3(0,0,-13)],
+            //         path: [new BABYLON.Vector3(0,0,0),new BABYLON.Vector3(0,10,0)],
+            //         sideOrientation: BABYLON.Mesh.DOUBLESIDE,
+            //         closeShape:true,
+            //         updatable:true,
+            //     }
+            // line = BABYLON.MeshBuilder.ExtrudeShape("line",options2)
+
+            return scene;
+
+        }
+
+        window.initFunction = async function () {
+
+
+            var asyncEngineCreation = async function () {
+                try {
+                    return createDefaultEngine();
+                } catch (e) {
+                    console.log("the available createEngine function failed. Creating the default engine instead");
+                    return createDefaultEngine();
+                }
+            }
+
+            window.engine = await asyncEngineCreation();
+            if (!engine) throw 'engine should not be null.';
+            startRenderLoop(engine, canvas);
+            window.scene = createScene();
+        };
+
+        initFunction().then(() => {
+            sceneToRender = scene
+        });
+
+        // Resize
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+    </script>
+</body>
+
+</html>
