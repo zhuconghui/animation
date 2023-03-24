@@ -1,7 +1,7 @@
 class Sphere {
     constructor(currentPosition, scene) {
         this.timeLineIndex = 1;
-        this.mesh = BABYLON.MeshBuilder.CreateSphere("sphere", { diameter: 0.5 }, scene)
+        this.mesh = BABYLON.MeshBuilder.CreateSphere("sphere", { diameter: 0.5 }, scene);
         this.mesh.position.x = currentPosition[0];
         this.mesh.position.y = 0.25;
         this.mesh.position.z = currentPosition[1];

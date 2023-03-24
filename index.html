@@ -21,14 +21,17 @@
     <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
     <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
 
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script src="https://preview.babylonjs.com/babylon.js"></script>
+    <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
 
     <script src="babylon.js"></script>
     <script src="line2D.js"></script>
     <script src="fct.js"></script>
     <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
     <script src="sphere.js"></script>
-
+    <script src="babylon.glTFFileLoader.js"></script>
     <style>
         html,
         body {
@@ -88,48 +91,17 @@
             var positions = [];
             positions = transformJSON(paquetJSON);
 
-            // BABYLON.SceneLoader.ImportMesh("", "https://www.babylonjs.com/assets/Tree/", "tree.babylon", scene, function (newMeshes) {
-            //     var mesh = newMeshes[0];
-            //     // Make the "root" mesh not visible. The instanced versions of it that we
-            //     // create below will be visible.
-            //     mesh.isVisible = false;
-            //     for (let index = 0; index < 100; index++) {
-            //         var newInstance = mesh.createInstance("i" + index);
-            //         // Here you could change the properties of your individual instance,
-            //         // for example to form a diagonal line of instances:
-            //         //  newInstance.position.x = index;
-            //         //  newInstance.position.z = index;
-            //         // See below for more details on what can be changed.
-            //     }
-            // });
+            BABYLON.SceneLoader.ImportMesh("", "https://raw.githubusercontent.com/zhuconghui/animation/main/Model3D/", "scene.gltf", scene, function (newMeshes) {
+                // var candy = newMeshes[0];
+                // candy.isVisible = false;
+                // candy.scaling = new BABYLON.Vector3(0.1, 0.1, 0.1);
+                // let candyColor = new BABYLON.StandardMaterial("candyCol", scene);
+                // candyColor.diffuseColor = new BABYLON.Color3(1, 0, 0);
+                // candy.material = candyColor;
 
-            BABYLON.SceneLoader.ImportMesh("", "https://raw.githubusercontent.com/dlkogan/fileHostTest/master/", "candyBab.babylon", scene, function (newMeshes) {
-                let candy = newMeshes[0];
-                candy.scaling = new BABYLON.Vector3(30, 30, 30);
-                // candy.parent = candyProxy;
-                let candyColor = new BABYLON.StandardMaterial("candyCol", scene);
-                candyColor.diffuseColor = new BABYLON.Color3(0, 1, 0);
-                candy.material = candyColor;
-
-                var t = candy.createInstance("t");
-                t.position = new BABYLON.Vector3(5,5,5);
-                scene.addMesh(t);
+                // var t = candy.createInstance("t");
+                // t.position = new BABYLON.Vector3(5,5,5)
             });
-            // BABYLON.SceneLoader.ImportMesh("test", "Model3D/", "scene.gltf", scene, function (newMeshes) {
-            // //     // Le modèle est chargé et peut être utilisé
-
-            // //     // Récupérer le mesh de l'homme
-            // //     var homme = newMeshes[0];
-
-            // //     // Créer une instance de l'homme
-            // //     var hommeInstance = homme.createInstance("homme-instance");
-
-            // //     // Positionner l'instance de l'homme
-            // //     hommeInstance.position = new BABYLON.Vector3(0, 0, 0);
-
-            // //     // Ajouter l'instance de l'homme à la scène
-            // //     scene.addMesh(hommeInstance);
-            //  });
 
             var spheres = [];
             for (let i = 0; i < positions[0].length; i++) {
